@@ -1,74 +1,158 @@
-# Turbo Setup React + TypeScript + Tailwind
+# AI-Powered Test Automation Platform
 
-A modern and efficient React starter template with TypeScript, Tailwind CSS, and various development tools pre-configured.
+A modern web application for generating and managing automated browser tests using AI, with zero manual coding required.
+
+![Test Automation Platform](https://via.placeholder.com/1200x600?text=Test+Automation+Platform)
 
 ## 🚀 Features
 
+### 🧩 Input & UI Understanding
+
+- Upload Figma frames or screenshots
+- AI-powered UI detection and component classification
+- Smart selector generation
+- Flow visualization and editing
+
+### 🧠 Test Case Generation
+
+- AI-generated test cases for various flows
+- Support for multiple test types (positive, negative, edge cases)
+- Mapping between elements and actions
+- Inline validation checks
+- Scenario variations
+- Export to Playwright/Puppeteer
+
+### 📊 Test Data Generation
+
+- Auto-generate dummy data
+- Define schema per screen
+- Reusable dataset manager
+- Manual override options
+
+### 🧪 Test Runner (Browser Automation)
+
+- Playwright-based test execution
+- Headless or visible browser mode
+- Automatic element handling
+- Wait and sync logic
+- Parallel and batch testing
+- CLI + UI runner support
+
+### 🧭 Outcome Detection & Assertion
+
+- Smart outcome handling after interaction
+- URL change detection
+- Toast/success detection
+- Error/message detection
+- Modal/popup detection
+- AI-based change analysis
+
+### 📈 Reporting & Logs
+
+- HTML test report with results
+- Screenshots and video recording
+- Step-by-step logs
+- Diff view (optional)
+
+## 🛠️ Technologies
+
 - ⚡️ [React 19](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/)
 - 🎨 [Tailwind CSS](https://tailwindcss.com/) for styling
+- 🧩 [Shadcn UI](https://ui.shadcn.com/) for UI components
 - 📦 [Vite](https://vitejs.dev/) for fast development and building
+- 🏪 [Zustand](https://zustand-demo.pmnd.rs/) for state management
+- 🌐 [React Router](https://reactrouter.com/) for routing
+- 🔄 [Axios](https://axios-http.com/) for HTTP requests
+- 🤖 [Playwright](https://playwright.dev/) for browser automation
 - 🔍 [ESLint](https://eslint.org/) for code linting
 - 💅 [Prettier](https://prettier.io/) for code formatting
 - 🐶 [Husky](https://typicode.github.io/husky/) for Git hooks
 - 📋 [Commitlint](https://commitlint.js.org/) for conventional commits
-- 🏪 [Zustand](https://zustand-demo.pmnd.rs/) for state management
-- 🌐 [React Router](https://reactrouter.com/) for routing
-- 📅 [Day.js](https://day.js.org/) for date manipulation
-- 🔄 [Axios](https://axios-http.com/) for HTTP requests
 
-## 🛠️ Prerequisites
+## � Prerequisites
 
 - Node.js (v18 or higher)
 - Bun (latest version)
 
 ## 📦 Installation
 
-# Clone the repository
+1. Clone the repository
 
-```
-git clone https://github.com/khoivudevz/turbo-setup-react-ts-tailwind
-```
+   ```bash
+   git clone https://github.com/yourusername/automation-test-generator.git
+   cd automation-test-generator
+   ```
 
-# Install dependencies
+2. Install dependencies
 
-```
-bun install
-```
+   ```bash
+   bun install
+   ```
 
-## 🚀 Development
+3. Start the development server
+   ```bash
+   bun dev
+   ```
 
-# Start development server
+## 🚀 Usage
 
-```
-bun dev # Development mode
-bun dev:stg # Staging mode
-bun dev:prod # Production mode
-```
+### Creating a Project
 
-# Start development server
+1. Navigate to the Projects page
+2. Click "Create New Project"
+3. Fill in the project details
+4. Click "Create Project"
 
-```
-bun build # Production build
-bun build:stg # Staging build
-bun build:dev # Development build
-```
+### Adding Features
 
-## 📁 Development
+1. Open a project
+2. Click "Add Feature" or "Generate with AI"
+3. Fill in the feature details or provide an AI prompt
+4. Click "Create Feature" or "Generate Feature"
+
+### Creating Test Cases
+
+1. Open a feature
+2. Click "Add Test Case" or "Generate with AI"
+3. Fill in the test case details or provide an AI prompt
+4. Click "Create Test Case" or "Generate Test Case"
+
+### Adding Test Steps
+
+1. Open a test case
+2. Click "Add Step"
+3. Select an action type (navigate, click, fill, assert, etc.)
+4. Provide the selector and any required values
+5. Click "Add Step"
+
+### Running Tests
+
+1. Open a test case or feature
+2. Click "Run Tests"
+3. View the test execution in real-time
+4. Check the test report after completion
+
+## 📁 Project Structure
 
 ```
 src/
 ├── assets/           # Static assets (images, fonts, icons)
 ├── components/       # Reusable UI components
-├── configs/          # Configuration files (env, http, app urls)
-├── constants/        # Application constants and shared values
-├── hooks/            # Custom React hooks (useFetch, useMutation, useKeyPress)
-├── layouts/          # Layout components and templates
+│   ├── ui/           # Base UI components (Button, Input, etc.)
+│   ├── AITestGeneratorForm/  # AI test generation form
+│   ├── TestCaseForm/  # Test case creation/editing form
+│   ├── TestStepForm/  # Test step creation/editing form
+│   └── ...
+├── configs/          # Configuration files
+├── constants/        # Application constants
+├── hooks/            # Custom React hooks
+├── layouts/          # Layout components
 ├── pages/            # Page components
 ├── providers/        # React context providers
 ├── router/           # Routing configuration
-├── services/         # Browser services (cookies, localStorage)
+├── services/         # Browser services
 ├── store/            # State management with Zustand
-├── styles/           # Global styles and Tailwind imports
+├── styles/           # Global styles
 ├── types/            # TypeScript type definitions
 ├── utils/            # Utility functions
 └── views/            # View components
