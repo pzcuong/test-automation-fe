@@ -1,0 +1,62 @@
+✅ AI-Powered Test Automation Platform – Feature List
+🚀 Goal: Auto-generate and run browser-based tests using AI to understand Figma or screen images, with zero manual coding.
+🧩 1. Input & UI Understanding
+Feature	Description
+✅ Upload multiple Figma frames or screenshots	Accept design inputs (Figma export or image files)
+✅ (Optional) Connect via Figma API	Import frames directly from a Figma project
+✅ AI-powered UI detection (no OCR)	Detect inputs, buttons, labels, messages using vision + language model
+✅ Auto-detect component types	Classify each element: button, input, label, etc.
+✅ Smart selector generation	Use data-testid, placeholder, text, aria-label, etc.
+✅ Detect layout & screen flow	Infer screen navigation (e.g., login → dashboard)
+✅ Flow visualization	Generate editable flowchart of the UI flow
+✅ User confirmation/editing	Let user review and tweak the generated flow
+
+🧠 2. Test Case Generation
+Feature	Description
+✅ AI-generated test cases per flow	For login, signup, errors, happy paths, etc.
+✅ Support for multiple test types	E.g., positive, negative, edge cases
+✅ Mapping between elements and actions	E.g., "click this", "fill that", "expect toast"
+✅ Inline validation checks	Auto-checks required fields, error handling
+✅ Scenario variations	E.g., 3 test users, missing inputs, invalid passwords
+✅ Export to Playwright/Puppeteer	Generates runnable .test.js or .spec.ts files
+
+📊 3. Test Data Generator
+Feature	Description
+✅ Auto-generate dummy data	Usernames, emails, passwords, edge cases
+✅ Define schema per screen	E.g., login needs 1 valid + 2 invalid users
+✅ Reusable dataset manager	Shared user pools across flows
+✅ Manual override	Allow input of custom test data
+
+🧪 4. Test Runner (Browser Automation)
+Feature	Description
+✅ Playwright-based test execution	Chromium, Firefox, WebKit
+✅ Headless or visible browser mode	For automation or debug
+✅ Automatic element handling	Clicks, fills, uploads, hovers
+✅ Wait and sync logic	Wait for DOM, network, animations
+✅ Parallel and batch testing	Multiple flows at once
+✅ CLI + UI runner support	Run from command line or dashboard
+
+🧭 5. Outcome Detection & Assertion
+Feature	Description
+✅ Smart outcome handler after interaction	Detect redirect, toast, error, modal, etc.
+✅ URL change detection	Identifies page navigation
+✅ Toast/success detection	Checks for .toast, [role="alert"], etc.
+✅ Error/message detection	Checks .error, aria-live, .form-error, etc.
+✅ Modal/popup detection	Dialogs, overlays, confirmation popups
+✅ AI-based change analysis (optional)	Before/after DOM analysis using GPT or model
+
+📈 6. Reporting & Logs
+Feature	Description
+✅ HTML test report with results	Visual log of test status
+✅ Screenshots and video recording	Per step (only on failure or always)
+✅ Step-by-step logs	Detailed browser actions
+✅ Diff view (optional)	Compare expected vs. actual DOM/screenshot
+
+🖥️ 7. Web Dashboard
+Feature	Description
+✅ Upload and manage Figma/screens	Project-oriented workspace
+✅ Visual flow editor	Modify screen-to-screen transitions
+✅ View test cases and edit steps	Low-code interface
+✅ Run tests from dashboard	Trigger and monitor browser tests
+✅ View logs, screenshots, results	All in one place
+
