@@ -16,24 +16,13 @@ import TestCaseForm from '@/components/TestCaseForm/TestCaseForm'
 import AITestGeneratorForm from '@/components/AITestGeneratorForm/AITestGeneratorForm'
 import FeatureSection from '@/components/FeatureSection/FeatureSection'
 import {useProjectStore} from '@/store'
-import {formatDate} from '@/utils/date'
-import {
-	TestCase,
-	TestCaseType,
-	TestStatus,
-	TestSuite,
-} from '@/types/common.types'
+import {TestCase, TestStatus} from '@/types/common.types'
 
 const ProjectDetailView: React.FC = () => {
 	const {projectId} = useParams<{projectId: string}>()
 	const navigate = useNavigate()
-	const {
-		projects,
-		selectedProject,
-		selectProject,
-		createTestCase,
-		generateTestCaseWithAI,
-	} = useProjectStore()
+	const {selectedProject, selectProject, generateTestCaseWithAI} =
+		useProjectStore()
 
 	// Panel states
 	const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(false)
@@ -81,10 +70,7 @@ const ProjectDetailView: React.FC = () => {
 		setIsSubmitting(true)
 
 		try {
-			const newTestCaseId = createTestCase(currentTestSuiteId, testCase)
 			setIsCreatePanelOpen(false)
-			// Optionally navigate to the new test case
-			// navigate(`/projects/${projectId}/test-cases/${newTestCaseId}`);
 		} catch (error) {
 			console.error('Failed to create test case:', error)
 		} finally {
@@ -92,7 +78,10 @@ const ProjectDetailView: React.FC = () => {
 		}
 	}
 
-	const handleGenerateWithAI = async (prompt: string) => {
+	const handleGenerateWithAI = async (
+		prompt: string,
+		dependencies?: string[]
+	) => {
 		if (!currentTestSuiteId) return
 
 		setIsSubmitting(true)
@@ -100,7 +89,8 @@ const ProjectDetailView: React.FC = () => {
 		try {
 			const newTestCaseId = await generateTestCaseWithAI(
 				currentTestSuiteId,
-				prompt
+				prompt,
+				dependencies
 			)
 			setIsAIPanelOpen(false)
 			// Optionally navigate to the new test case
@@ -347,11 +337,14 @@ const ProjectDetailView: React.FC = () => {
 				title='Create New Test Case'
 				size='md'
 			>
-				<TestCaseForm
-					onSubmit={handleCreateTestCase}
-					onCancel={() => setIsCreatePanelOpen(false)}
-					isSubmitting={isSubmitting}
-				/>
+				{currentTestSuiteId && (
+					<TestCaseForm
+						testSuiteId={currentTestSuiteId}
+						onSubmit={handleCreateTestCase}
+						onCancel={() => setIsCreatePanelOpen(false)}
+						isSubmitting={isSubmitting}
+					/>
+				)}
 			</SlidePanel>
 
 			{/* AI Test Generator Panel */}
@@ -361,11 +354,14 @@ const ProjectDetailView: React.FC = () => {
 				title='Generate Test Case with AI'
 				size='md'
 			>
-				<AITestGeneratorForm
-					onSubmit={handleGenerateWithAI}
-					onCancel={() => setIsAIPanelOpen(false)}
-					isSubmitting={isSubmitting}
-				/>
+				{currentTestSuiteId && (
+					<AITestGeneratorForm
+						testSuiteId={currentTestSuiteId}
+						onSubmit={handleGenerateWithAI}
+						onCancel={() => setIsAIPanelOpen(false)}
+						isSubmitting={isSubmitting}
+					/>
+				)}
 			</SlidePanel>
 
 			{/* Edit Project Panel */}
@@ -379,12 +375,12 @@ const ProjectDetailView: React.FC = () => {
 					<Input
 						id='project-name'
 						label='Project Name'
-						defaultValue={selectedProject.name}
+						value={selectedProject.name}
 					/>
 					<Input
 						id='project-description'
 						label='Description'
-						defaultValue={selectedProject.description}
+						value={selectedProject.description}
 					/>
 					<div className='flex justify-end space-x-3 mt-6'>
 						<Button

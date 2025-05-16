@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react'
-import {Button, Input, TextArea, Select} from '@/components/ui'
+import {Button, Input, TextArea, Select, Checkbox} from '@/components/ui'
 import {TestCase, TestCaseType, TestStatus} from '@/types/common.types'
+import {useProjectStore} from '@/store'
 
 interface TestCaseFormProps {
 	testCase?: TestCase
+	testSuiteId: string
 	onSubmit: (
 		testCase: Omit<
 			TestCase,
@@ -16,6 +18,7 @@ interface TestCaseFormProps {
 
 const TestCaseForm: React.FC<TestCaseFormProps> = ({
 	testCase,
+	testSuiteId,
 	onSubmit,
 	onCancel,
 	isSubmitting = false,
@@ -26,7 +29,33 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
 	const [target, setTarget] = useState('')
 	const [type, setType] = useState<TestCaseType>(TestCaseType.POSITIVE)
 	const [status, setStatus] = useState<TestStatus>(TestStatus.DRAFT)
+	const [dependencies, setDependencies] = useState<string[]>([])
+	const [showDependencies, setShowDependencies] = useState(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
+
+	// Get available test cases for dependencies
+	const {projects} = useProjectStore()
+	const availableTestCases: TestCase[] = []
+
+	// Find all test cases in the current project that could be dependencies
+	projects.forEach((project) => {
+		project.testSuites.forEach((suite) => {
+			if (suite.id === testSuiteId) {
+				// Don't include test cases from the current suite as dependencies
+				// to avoid circular dependencies
+				return
+			}
+
+			suite.testCases.forEach((tc) => {
+				// Don't include the current test case as a dependency option
+				if (testCase && tc.id === testCase.id) {
+					return
+				}
+
+				availableTestCases.push(tc)
+			})
+		})
+	})
 
 	useEffect(() => {
 		if (testCase) {
@@ -36,6 +65,8 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
 			setTarget(testCase.target)
 			setType(testCase.type)
 			setStatus(testCase.status)
+			setDependencies(testCase.dependencies || [])
+			setShowDependencies(testCase.dependencies?.length > 0 || false)
 		}
 	}, [testCase])
 
@@ -76,6 +107,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
 			target,
 			type,
 			status,
+			dependencies: showDependencies ? dependencies : undefined,
 		})
 	}
 
@@ -150,6 +182,66 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
 					]}
 					required
 				/>
+			</div>
+
+			<div className='pt-4 border-t border-gray-200'>
+				<div className='flex items-center mb-4'>
+					<Checkbox
+						id='has-dependencies'
+						checked={showDependencies}
+						onChange={(e) => setShowDependencies(e.target.checked)}
+					/>
+					<label
+						htmlFor='has-dependencies'
+						className='ml-2 text-sm font-medium text-gray-700'
+					>
+						This test case depends on other test cases
+					</label>
+				</div>
+
+				{showDependencies && (
+					<div className='pl-6 space-y-4'>
+						<p className='text-sm text-gray-600'>
+							Select test cases that must be run before this one. Dependent test
+							cases will share data and run in the correct order.
+						</p>
+
+						{availableTestCases.length === 0 ? (
+							<p className='text-sm text-gray-500 italic'>
+								No available test cases to depend on.
+							</p>
+						) : (
+							<div className='max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3 space-y-2'>
+								{availableTestCases.map((tc) => (
+									<div key={tc.id} className='flex items-start'>
+										<Checkbox
+											id={`dependency-${tc.id}`}
+											checked={dependencies.includes(tc.id)}
+											onChange={(e) => {
+												if (e.target.checked) {
+													setDependencies([...dependencies, tc.id])
+												} else {
+													setDependencies(
+														dependencies.filter((id) => id !== tc.id)
+													)
+												}
+											}}
+										/>
+										<div className='ml-2'>
+											<label
+												htmlFor={`dependency-${tc.id}`}
+												className='text-sm font-medium text-gray-700'
+											>
+												{tc.name}
+											</label>
+											<p className='text-xs text-gray-500'>{tc.description}</p>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</div>
+				)}
 			</div>
 
 			<div className='flex justify-end space-x-3 pt-4'>

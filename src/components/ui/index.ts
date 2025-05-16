@@ -7,6 +7,7 @@ export {default as Badge} from './Badge/Badge'
 export {default as Modal} from './Modal/Modal'
 export {default as SlidePanel} from './SlidePanel/SlidePanel'
 export {default as Collapsible} from './Collapsible/Collapsible'
+export {default as Checkbox} from './Checkbox/Checkbox'
 export {
 	default as ActionButton,
 	PlusIcon,

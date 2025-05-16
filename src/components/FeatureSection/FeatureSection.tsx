@@ -1,7 +1,6 @@
 import React, {useState} from 'react'
 import {
 	Button,
-	Card,
 	Input,
 	ActionButton,
 	PlusIcon,
@@ -71,15 +70,7 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
 					<h2 className='text-xl font-semibold text-gray-900'>{title}</h2>
 					<p className='text-gray-600 text-sm'>{description}</p>
 				</div>
-				<div className='flex gap-2'>
-					<ActionButton
-						icon={<PlusIcon />}
-						variant='outline'
-						size='sm'
-						onClick={() => setIsAddingFeature(true)}
-					>
-						Add Feature
-					</ActionButton>
+				<div className='flex justify-center gap-2 mt-4'>
 					<ActionButton
 						icon={<AIIcon />}
 						variant='outline'
@@ -87,6 +78,14 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({
 						onClick={() => setIsAIGenerating(true)}
 					>
 						Generate with AI
+					</ActionButton>
+					<ActionButton
+						icon={<PlusIcon />}
+						variant='outline'
+						size='sm'
+						onClick={() => setIsAddingFeature(true)}
+					>
+						Add Feature
 					</ActionButton>
 				</div>
 			</div>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {
 	TestCase,
 	TestCaseType,
@@ -8,6 +8,7 @@ import {
 import {Collapsible, Button, Badge} from '@/components/ui'
 import TestCaseForm from '@/components/TestCaseForm/TestCaseForm'
 import TestStepForm from '@/components/TestStepForm/TestStepForm'
+import CollapsibleTestStepsList from '@/components/CollapsibleTestStepsList/CollapsibleTestStepsList'
 import {formatDate} from '@/utils/date'
 
 interface CollapsibleTestCaseProps {
@@ -23,6 +24,7 @@ interface CollapsibleTestCaseProps {
 		updates: Partial<Omit<TestStep, 'id' | 'testCaseId'>>
 	) => void
 	onDeleteStep: (stepId: string) => void
+	onReorderSteps?: (steps: TestStep[]) => void
 	isSubmitting?: boolean
 }
 
@@ -32,11 +34,53 @@ const CollapsibleTestCase: React.FC<CollapsibleTestCaseProps> = ({
 	onAddStep,
 	onUpdateStep,
 	onDeleteStep,
+	onReorderSteps,
 	isSubmitting = false,
 }) => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [isAddingStep, setIsAddingStep] = useState(false)
 	const [editingStep, setEditingStep] = useState<TestStep | null>(null)
+
+	// Listen for edit step events
+	useEffect(() => {
+		const handleEditStepEvent = (event: CustomEvent) => {
+			const {stepId} = event.detail
+			const step = testCase.steps.find((s) => s.id === stepId)
+			if (step) {
+				setEditingStep(step)
+				// Ensure the test case is expanded
+				const collapsibleElement = document.getElementById(
+					'collapsible-test-case'
+				)
+				if (collapsibleElement) {
+					// Find the collapsible content and make sure it's visible
+					const collapsibleContent = collapsibleElement.querySelector(
+						'[data-state="open"]'
+					)
+					if (!collapsibleContent) {
+						// If not open, find and click the trigger button
+						const triggerButton = collapsibleElement.querySelector(
+							'[data-state="closed"]'
+						)
+						if (triggerButton) {
+							;(triggerButton as HTMLElement).click()
+						}
+					}
+				}
+			}
+		}
+
+		// Add event listener
+		document.addEventListener('editStep', handleEditStepEvent as EventListener)
+
+		// Clean up
+		return () => {
+			document.removeEventListener(
+				'editStep',
+				handleEditStepEvent as EventListener
+			)
+		}
+	}, [testCase.steps])
 
 	const getStatusBadgeVariant = (status: TestStatus) => {
 		switch (status) {
@@ -92,7 +136,7 @@ const CollapsibleTestCase: React.FC<CollapsibleTestCaseProps> = ({
 
 	const titleContent = (
 		<div className='flex items-center gap-2'>
-			<span>{testCase.name}</span>
+			<span className='text-lg font-semibold'>{testCase.name}</span>
 			<Badge variant={getStatusBadgeVariant(testCase.status)}>
 				{testCase.status}
 			</Badge>
@@ -103,7 +147,7 @@ const CollapsibleTestCase: React.FC<CollapsibleTestCaseProps> = ({
 	)
 
 	return (
-		<Collapsible title={titleContent} className='mb-4'>
+		<Collapsible title={titleContent} className='mb-4' defaultOpen={true}>
 			{isEditing ? (
 				<TestCaseForm
 					testCase={testCase}
@@ -171,108 +215,50 @@ const CollapsibleTestCase: React.FC<CollapsibleTestCaseProps> = ({
 							</div>
 						)}
 
-						<div className='space-y-3'>
-							{testCase.steps.length === 0 ? (
-								<div className='text-center py-6 bg-gray-50 rounded-md'>
-									<p className='text-gray-500'>No steps added yet</p>
-									<Button
-										variant='outline'
-										size='sm'
-										className='mt-2'
-										onClick={() => setIsAddingStep(true)}
-									>
-										Add First Step
-									</Button>
-								</div>
-							) : (
-								testCase.steps
-									.sort((a, b) => a.order - b.order)
-									.map((step) => (
-										<React.Fragment key={step.id}>
-											<div className='p-3 border border-gray-200 rounded-md hover:bg-gray-50'>
-												<div className='flex items-center gap-3'>
-													<div className='bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center font-medium text-gray-700'>
-														{step.order}
-													</div>
-													<div className='flex-grow'>
-														<div className='font-medium capitalize'>
-															{step.action}
-														</div>
-														<div className='text-sm text-gray-600 mt-1'>
-															{step.selector}
-															{step.value && (
-																<span className='ml-2'>
-																	Value: {step.value}
-																</span>
-															)}
-														</div>
-														{step.expectedOutcome && (
-															<div className='text-sm text-gray-600 mt-1'>
-																Expected: {step.expectedOutcome}
-															</div>
-														)}
-													</div>
-													<div className='flex gap-2'>
-														<Button
-															variant='ghost'
-															size='sm'
-															onClick={() => setEditingStep(step)}
-														>
-															<svg
-																xmlns='http://www.w3.org/2000/svg'
-																className='h-4 w-4'
-																viewBox='0 0 24 24'
-																fill='none'
-																stroke='currentColor'
-																strokeWidth='2'
-																strokeLinecap='round'
-																strokeLinejoin='round'
-															>
-																<path d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' />
-																<path d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' />
-															</svg>
-														</Button>
-														<Button
-															variant='ghost'
-															size='sm'
-															onClick={() => onDeleteStep(step.id)}
-														>
-															<svg
-																xmlns='http://www.w3.org/2000/svg'
-																className='h-4 w-4 text-red-500'
-																viewBox='0 0 24 24'
-																fill='none'
-																stroke='currentColor'
-																strokeWidth='2'
-																strokeLinecap='round'
-																strokeLinejoin='round'
-															>
-																<path d='M3 6h18' />
-																<path d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' />
-																<line x1='10' y1='11' x2='10' y2='17' />
-																<line x1='14' y1='11' x2='14' y2='17' />
-															</svg>
-														</Button>
-													</div>
-												</div>
-											</div>
+						{testCase.steps.length === 0 ? (
+							<div className='text-center py-6 bg-gray-50 rounded-md'>
+								<p className='text-gray-500'>No steps added yet</p>
+								<Button
+									variant='outline'
+									size='sm'
+									className='mt-2'
+									onClick={() => setIsAddingStep(true)}
+								>
+									Add First Step
+								</Button>
+							</div>
+						) : (
+							<CollapsibleTestStepsList
+								steps={testCase.steps}
+								onReorder={(updatedSteps) => {
+									// If onReorderSteps is provided, use it directly
+									if (onReorderSteps) {
+										onReorderSteps(updatedSteps)
+									} else {
+										// Fallback to updating each step individually
+										updatedSteps.forEach((step) => {
+											onUpdateStep(step.id, {order: step.order})
+										})
+									}
+								}}
+								onEdit={(step) => setEditingStep(step)}
+								onDelete={onDeleteStep}
+								editingStepId={editingStep?.id || null}
+							/>
+						)}
 
-											{/* Edit form appears directly below the step being edited */}
-											{editingStep && editingStep.id === step.id && (
-												<div className='mt-1 mb-3 p-4 border border-gray-200 rounded-md bg-gray-50'>
-													<h4 className='font-medium mb-2'>Edit Step</h4>
-													<TestStepForm
-														step={editingStep}
-														onSubmit={handleUpdateStep}
-														onCancel={() => setEditingStep(null)}
-														isSubmitting={isSubmitting}
-													/>
-												</div>
-											)}
-										</React.Fragment>
-									))
-							)}
-						</div>
+						{/* Edit form appears below the steps list when a step is being edited */}
+						{editingStep && (
+							<div className='mt-3 p-4 border border-gray-200 rounded-md bg-gray-50'>
+								<h4 className='font-medium mb-2'>Edit Step</h4>
+								<TestStepForm
+									step={editingStep}
+									onSubmit={handleUpdateStep}
+									onCancel={() => setEditingStep(null)}
+									isSubmitting={isSubmitting}
+								/>
+							</div>
+						)}
 					</div>
 				</div>
 			)}

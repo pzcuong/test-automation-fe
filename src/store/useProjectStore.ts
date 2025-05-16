@@ -49,11 +49,13 @@ interface ProjectState {
 		updates: Partial<Omit<TestStep, 'id' | 'testCaseId'>>
 	) => void
 	deleteTestStep: (testCaseId: string, stepId: string) => void
+	reorderTestSteps: (testCaseId: string, reorderedSteps: TestStep[]) => void
 
 	// AI Test Generation
 	generateTestCaseWithAI: (
 		testSuiteId: string,
-		prompt: string
+		prompt: string,
+		dependencies?: string[]
 	) => Promise<string>
 }
 
@@ -427,13 +429,109 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 		}
 	},
 
-	generateTestCaseWithAI: async (testSuiteId: string, prompt: string) => {
+	reorderTestSteps: (testCaseId: string, reorderedSteps: TestStep[]) => {
+		const {projects} = get()
+		const now = new Date().toISOString()
+
+		const updatedProjects = projects.map((project) => {
+			const updatedTestSuites = project.testSuites.map((suite) => {
+				const updatedTestCases = suite.testCases.map((testCase) => {
+					if (testCase.id === testCaseId) {
+						return {
+							...testCase,
+							steps: reorderedSteps,
+							updatedAt: now,
+						}
+					}
+					return testCase
+				})
+
+				return {
+					...suite,
+					testCases: updatedTestCases,
+				}
+			})
+
+			return {
+				...project,
+				testSuites: updatedTestSuites,
+			}
+		})
+
+		set({projects: updatedProjects})
+
+		// Update selected test case if it's the one being updated
+		const {selectedTestCase} = get()
+		if (selectedTestCase && selectedTestCase.id === testCaseId) {
+			set({
+				selectedTestCase: {
+					...selectedTestCase,
+					steps: reorderedSteps,
+					updatedAt: now,
+				},
+			})
+		}
+	},
+
+	generateTestCaseWithAI: async (
+		testSuiteId: string,
+		prompt: string,
+		dependencies?: string[]
+	) => {
 		// Simulate API call delay
 		await new Promise((resolve) => setTimeout(resolve, 1500))
 
 		// In a real app, this would call an AI service
 		const now = new Date().toISOString()
 		const newTestCaseId = `tc-${Date.now()}`
+
+		// Find dependent test cases if any
+		let dependentTestCases: TestCase[] = []
+		if (dependencies && dependencies.length > 0) {
+			const {projects} = get()
+
+			// Find all dependent test cases
+			projects.forEach((project) => {
+				project.testSuites.forEach((suite) => {
+					suite.testCases.forEach((tc) => {
+						if (dependencies.includes(tc.id)) {
+							dependentTestCases.push(tc)
+						}
+					})
+				})
+			})
+		}
+
+		// Generate sample shared data if there are dependencies
+		const sharedData: Record<string, any> = {}
+		if (dependentTestCases.length > 0) {
+			// Example: If this is a product-related test case, share product data
+			if (prompt.toLowerCase().includes('product')) {
+				sharedData.productId = `prod-${Date.now()}`
+				sharedData.productName = 'Sample Product'
+				sharedData.productPrice = 99.99
+				sharedData.productDescription = 'This is a sample product for testing'
+			}
+
+			// Example: If this is an order-related test case, share order data
+			if (prompt.toLowerCase().includes('order')) {
+				sharedData.orderId = `order-${Date.now()}`
+				sharedData.orderTotal = 99.99
+				sharedData.orderItems = [
+					{name: 'Sample Product', price: 99.99, quantity: 1},
+				]
+			}
+
+			// Example: If this is a user-related test case, share user data
+			if (
+				prompt.toLowerCase().includes('user') ||
+				prompt.toLowerCase().includes('login')
+			) {
+				sharedData.userId = `user-${Date.now()}`
+				sharedData.username = 'testuser'
+				sharedData.email = 'testuser@example.com'
+			}
+		}
 
 		// Generate a sample test case based on the prompt
 		const generatedTestCase: TestCase = {
@@ -445,6 +543,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 			createdAt: now,
 			updatedAt: now,
 			testSuiteId,
+			dependencies,
+			sharedData: Object.keys(sharedData).length > 0 ? sharedData : undefined,
 			steps: [
 				{
 					id: `step-${Date.now()}-1`,
@@ -492,6 +592,30 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 					testCaseId: newTestCaseId,
 				},
 			],
+		}
+
+		// Add steps that use shared data from dependencies if applicable
+		if (dependentTestCases.length > 0) {
+			// Example: If this is an order test and depends on a product test
+			const productDependency = dependentTestCases.find((tc) =>
+				tc.name.toLowerCase().includes('product')
+			)
+
+			if (productDependency && prompt.toLowerCase().includes('order')) {
+				// Add steps that verify product data consistency
+				generatedTestCase.steps.push({
+					id: `step-${Date.now()}-7`,
+					order: 7,
+					action: 'assert',
+					selector: '.product-price',
+					expectedOutcome: '$99.99', // Should match the price from the product test
+					testCaseId: newTestCaseId,
+				})
+
+				// Add a note about data consistency in the description
+				generatedTestCase.description +=
+					'\n\nThis test case verifies data consistency with the product test case.'
+			}
 		}
 
 		// Add the generated test case to the store

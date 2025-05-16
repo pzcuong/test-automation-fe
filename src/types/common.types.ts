@@ -49,6 +49,9 @@ export interface TestCase {
 	updatedAt: string
 	testSuiteId: string
 	steps: TestStep[]
+	dependencies?: string[] // IDs of test cases this test depends on
+	sharedData?: Record<string, any> // Data that can be shared with dependent tests
+	usesSharedData?: string[] // Keys of shared data this test uses
 }
 
 export enum TestCaseType {
@@ -140,6 +143,24 @@ export interface TestData {
 	description?: string
 	data: Record<string, any>[]
 	projectId: string
+	scope: TestDataScope
+	tags?: string[]
+}
+
+export enum TestDataScope {
+	PROJECT = 'project', // Available to all test cases in the project
+	SUITE = 'suite', // Available to all test cases in a test suite
+	TESTCASE = 'testcase', // Available only to a specific test case and its dependents
+}
+
+export interface SharedTestDataItem {
+	id: string
+	key: string
+	value: any
+	description?: string
+	sourceTestId?: string // ID of the test case that generated this data
+	createdAt: string
+	updatedAt: string
 }
 
 // Report related interfaces
